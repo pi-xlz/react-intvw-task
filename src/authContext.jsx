@@ -1,5 +1,5 @@
-import React, { useReducer } from "react";
-import MkdSDK from "./utils/MkdSDK";
+import React, { useReducer } from 'react';
+import MkdSDK from './utils/MkdSDK';
 
 export const AuthContext = React.createContext();
 
@@ -12,12 +12,19 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "LOGIN":
+    case 'LOGIN':
       //TODO
+      const { token, user_id, role } = action.payload;
+      localStorage.setItem('token', token);
+      console.log(action.payload);
       return {
         ...state,
+        token,
+        user: user_id,
+        role,
+        isAuthenticated: true,
       };
-    case "LOGOUT":
+    case 'LOGOUT':
       localStorage.clear();
       return {
         ...state,
@@ -30,14 +37,18 @@ const reducer = (state, action) => {
 };
 
 let sdk = new MkdSDK();
+const checkToken = async (state) => {
+  const res = await sdk.check(state.role);
+  console.log(res);
+};
 
 export const tokenExpireError = (dispatch, errorMessage) => {
-  const role = localStorage.getItem("role");
-  if (errorMessage === "TOKEN_EXPIRED") {
+  const role = localStorage.getItem('role');
+  if (errorMessage === 'TOKEN_EXPIRED') {
     dispatch({
-      type: "Logout",
+      type: 'Logout',
     });
-    window.location.href = "/" + role + "/login";
+    window.location.href = '/' + role + '/login';
   }
 };
 
@@ -46,7 +57,8 @@ const AuthProvider = ({ children }) => {
 
   React.useEffect(() => {
     //TODO
-  }, []);
+    checkToken(state);
+  }, [state]);
 
   return (
     <AuthContext.Provider
